@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3 uid="uid://dcyuy1jo0ak38"]
+
+[ext_resource type="Shader" uid="uid://347be65eb0n1" path="res://custom_sky.tres" id="1_5pp3d"]
+
+[sub_resource type="Gradient" id="Gradient_bdlyh"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.34375, 0.796875)
+colors = PackedColorArray(0, 0.40392157, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5c78l"]
+frequency = 0.0202
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3puiv"]
+noise = SubResource("FastNoiseLite_5c78l")
+color_ramp = SubResource("Gradient_bdlyh")
+seamless = true
+seamless_blend_skirt = 0.133
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0ct1b"]
+shader = ExtResource("1_5pp3d")
+shader_parameter/tex = SubResource("NoiseTexture2D_3puiv")
+
+[sub_resource type="Sky" id="Sky_lch73"]
+sky_material = SubResource("ShaderMaterial_0ct1b")
+
+[sub_resource type="Environment" id="Environment_ep7aw"]
+background_mode = 2
+sky = SubResource("Sky_lch73")
+
+[node name="World" type="Node"]
+
+[node name="Environment" type="Node3D" parent="."]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
+environment = SubResource("Environment_ep7aw")
+
+[node name="Plane" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Plane"]
