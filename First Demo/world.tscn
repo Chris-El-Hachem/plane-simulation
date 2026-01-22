@@ -1,6 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dcyuy1jo0ak38"]
+[gd_scene load_steps=16 format=3 uid="uid://dcyuy1jo0ak38"]
 
 [ext_resource type="Shader" uid="uid://347be65eb0n1" path="res://custom_sky.tres" id="1_5pp3d"]
+[ext_resource type="Texture2D" uid="uid://d3yydsb4jf73m" path="res://grass.jpg" id="2_bdlyh"]
+[ext_resource type="Script" uid="uid://b72g2uoh6fsjj" path="res://First Demo/plane.gd" id="3_5c78l"]
 
 [sub_resource type="Gradient" id="Gradient_bdlyh"]
 interpolation_mode = 2
@@ -27,6 +29,28 @@ sky_material = SubResource("ShaderMaterial_0ct1b")
 background_mode = 2
 sky = SubResource("Sky_lch73")
 
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5c78l"]
+friction = 0.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5c78l"]
+albedo_texture = ExtResource("2_bdlyh")
+uv1_scale = Vector3(0.3, 0.3, 0.3)
+uv1_triplanar = true
+
+[sub_resource type="BoxMesh" id="BoxMesh_5pp3d"]
+material = SubResource("StandardMaterial3D_5c78l")
+size = Vector3(50, 1, 7000)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bdlyh"]
+size = Vector3(50, 1, 7000)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_3puiv"]
+radius = 1.5
+height = 10.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0ct1b"]
+size = Vector3(3, 1, 3)
+
 [node name="World" type="Node"]
 
 [node name="Environment" type="Node3D" parent="."]
@@ -34,6 +58,29 @@ sky = SubResource("Sky_lch73")
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Environment"]
 environment = SubResource("Environment_ep7aw")
 
-[node name="Plane" type="Node3D" parent="."]
+[node name="Ground" type="StaticBody3D" parent="Environment"]
+physics_material_override = SubResource("PhysicsMaterial_5c78l")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Environment/Ground"]
+mesh = SubResource("BoxMesh_5pp3d")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Environment/Ground"]
+shape = SubResource("BoxShape3D_bdlyh")
+
+[node name="Plane" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8585615, 0)
+mass = 743.0
+linear_damp_mode = 1
+angular_damp_mode = 1
+script = ExtResource("3_5c78l")
 
 [node name="Camera3D" type="Camera3D" parent="Plane"]
+transform = Transform3D(1, 0, 0, 0, 0.89009345, 0.45577797, 0, -0.45577797, 0.89009345, 0, 4.848154, 9.139953)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Plane"]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_3puiv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Plane"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3299847, 0)
+shape = SubResource("BoxShape3D_0ct1b")
