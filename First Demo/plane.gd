@@ -1,49 +1,57 @@
 extends RigidBody3D
 
+var currentThrustMagnitude: float = 0
+var thrust: Vector3 = Vector3.ZERO
+const MAX_THRUST_MAGNITUDE: float = 2150 # N
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var wind: Vector3 = Vector3.ZERO
 
-# https://rnac.com.au/cessna-172/
-
-var currentThrustMagnitude : float = 0
-var thrust : Vector3 = Vector3.ZERO
-const MAX_THRUST_MAGNITUDE : float = 2150 # N
-
-var frictionCoefficient : float = 0.0319
-#const AIR_DENSITY : float = 1.225 # kg/m^3
-const DRAG_AREA : float = 0.52 # m^2
-var forwardVelocitySquared : float = 0 # m/s
-var drag : Vector3 = Vector3.ZERO
-
-const WING_AREA : float = 16.17 # m^2
-var liftCoefficient = 1.6
-var lift: Vector3 = Vector3.ZERO
-
-func rho(h: float) -> float:
+func air_density(height: float) -> float:
 	# https://physics.stackexchange.com/questions/299907/air-density-as-a-function-of-altitude-only
 	const T_0 = 288.16 # K
 	const alpha = 0.0065 # K/m
-	var T = T_0 - alpha * h # K
-	const rho_0 = 1.225 # kg/m^2
+	var T: float = T_0 - alpha * height # K
+	const air_density_sea_level = 1.225 # kg/m^2
 	const n = 5.2561
-	return rho_0 * (T/T_0) ** (n-1)
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+	return air_density_sea_level * pow(T/T_0, n-1)
+
+func _physics_process(delta: float) -> void:
+	var forward: Vector3 = -global_transform.basis.z
+	
+	# Thrust
 	if Input.is_action_pressed("thrust"):
 		currentThrustMagnitude = MAX_THRUST_MAGNITUDE
 	else:
 		currentThrustMagnitude = 0
+	thrust = currentThrustMagnitude * forward
 	
-	forwardVelocitySquared = linear_velocity.dot(Vector3.FORWARD)**2
-	thrust = currentThrustMagnitude * Vector3.FORWARD
-	drag = 0.5 * rho(position.y) * frictionCoefficient * DRAG_AREA * forwardVelocitySquared * Vector3.BACK
-	lift = 0.5 * rho(position.y) * liftCoefficient * WING_AREA * forwardVelocitySquared * Vector3.UP
+	var sum_of_forces: Vector3 = thrust
+	var sum_of_torques: Vector3 = Vector3.ZERO
+	
+	var world_flow_velocity: Vector3 = -linear_velocity + wind
+	
+	for surface in $Surfaces.get_children():
+		
+		var inverse_global_transform = global_transform.inverse()
+		var lift_direction = inverse_global_transform.basis * surface.global_transform.basis.y
+		var drag_direction = inverse_global_transform.basis * surface.global_transform.basis.z
+		var moment_direction = inverse_global_transform.basis * -surface.global_transform.basis.x
+		
+		var local_flow_velocity: Vector3 = surface.global_transform.inverse().basis * (world_flow_velocity - angular_velocity.cross(surface.position))
+		local_flow_velocity.x = 0
+		
+		var forces: Vector3 = surface.calculate_forces(local_flow_velocity, air_density(position.y))
+		
+		var lift: Vector3 = forces.x * lift_direction
+		#print(forces.x)
+		var drag: Vector3 = forces.y * drag_direction
+		var moment: Vector3 = forces.z * moment_direction
+		print("forces" + str(forces))
+		
+		sum_of_forces += lift + drag
+		sum_of_torques += moment + surface.position.cross(lift + drag)
+		
 	print(linear_velocity)
-	print(thrust)
-	print(drag)
-	print(lift)
-	apply_central_force(thrust + drag + lift)
+	apply_central_force(sum_of_forces)
+	apply_torque(sum_of_torques)
 	
-	#print(constant_force)

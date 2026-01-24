@@ -1,8 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://dcyuy1jo0ak38"]
+[gd_scene load_steps=17 format=3 uid="uid://dcyuy1jo0ak38"]
 
 [ext_resource type="Shader" uid="uid://347be65eb0n1" path="res://custom_sky.tres" id="1_5pp3d"]
 [ext_resource type="Texture2D" uid="uid://d3yydsb4jf73m" path="res://grass.jpg" id="2_bdlyh"]
 [ext_resource type="Script" uid="uid://b72g2uoh6fsjj" path="res://First Demo/plane.gd" id="3_5c78l"]
+[ext_resource type="Script" uid="uid://ddq8skmkptdx0" path="res://aero_surface.gd" id="4_3puiv"]
 
 [sub_resource type="Gradient" id="Gradient_bdlyh"]
 interpolation_mode = 2
@@ -39,17 +40,17 @@ uv1_triplanar = true
 
 [sub_resource type="BoxMesh" id="BoxMesh_5pp3d"]
 material = SubResource("StandardMaterial3D_5c78l")
-size = Vector3(50, 1, 7000)
+size = Vector3(7000, 1, 7000)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bdlyh"]
-size = Vector3(50, 1, 7000)
+size = Vector3(7000, 1, 7000)
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_3puiv"]
 radius = 1.5
 height = 10.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_0ct1b"]
-size = Vector3(3, 1, 3)
+size = Vector3(3, 1, 9.377319)
 
 [node name="World" type="Node"]
 
@@ -69,7 +70,7 @@ shape = SubResource("BoxShape3D_bdlyh")
 
 [node name="Plane" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8585615, 0)
-mass = 743.0
+mass = 200.0
 linear_damp_mode = 1
 angular_damp_mode = 1
 script = ExtResource("3_5c78l")
@@ -82,5 +83,33 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0
 mesh = SubResource("CapsuleMesh_3puiv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Plane"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3299847, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.3299847, -0.093566895)
 shape = SubResource("BoxShape3D_0ct1b")
+
+[node name="Surfaces" type="Node3D" parent="Plane"]
+
+[node name="LeftWing" type="Node3D" parent="Plane/Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, 0.2)
+script = ExtResource("4_3puiv")
+chord = 2.0
+span = 4.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="LeftTail" type="Node3D" parent="Plane/Surfaces"]
+transform = Transform3D(-1, 7.642742e-15, 8.742278e-08, 0, -1, 8.742278e-08, 8.742278e-08, 8.742278e-08, 1, -2.2, 1, 3.3)
+script = ExtResource("4_3puiv")
+span = 2.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="RightWing" type="Node3D" parent="Plane/Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.2)
+script = ExtResource("4_3puiv")
+chord = 2.0
+span = 4.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="RightTail" type="Node3D" parent="Plane/Surfaces"]
+transform = Transform3D(-1, 7.642742e-15, 8.742278e-08, 0, -1, 8.742278e-08, 8.742278e-08, 8.742278e-08, 1, 2.2, 1, 3.3)
+script = ExtResource("4_3puiv")
+span = 2.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
