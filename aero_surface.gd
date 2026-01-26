@@ -78,7 +78,7 @@ func calculate_forces(local_flow_velocity: Vector3, air_density: float) -> Vecto
 	var flap_effectiveness: float = 1 - (theta - sin(theta)) / PI
 	var delta_lift: float = corrected_lift_slope * flap_effectiveness * _flap_effectiveness_correction(_flap_angle_rad) * _flap_angle_rad
 	
-	var zero_lift_aoa_rad: float = deg_to_rad(zero_lift_aoa_deg) - delta_lift / corrected_lift_slope
+	var zero_lift_aoa_rad: float = deg_to_rad(zero_lift_aoa_deg)
 	var zero_lift_aoa: float = zero_lift_aoa_rad - delta_lift / corrected_lift_slope
 	
 	var high_stall_angle_rad: float = deg_to_rad(high_stall_angle_deg)
@@ -87,12 +87,12 @@ func calculate_forces(local_flow_velocity: Vector3, air_density: float) -> Vecto
 	var cl_max_high: float = corrected_lift_slope * (high_stall_angle_rad - zero_lift_aoa_rad) + delta_lift * _lift_coefficient_max_fraction(flap_fraction)
 	var cl_max_low: float = corrected_lift_slope * (low_stall_angle_rad - zero_lift_aoa_rad) + delta_lift * _lift_coefficient_max_fraction(flap_fraction)
 	
-	var stall_angle_high: float = zero_lift_aoa * cl_max_high / corrected_lift_slope
-	var stall_angle_low: float = zero_lift_aoa * cl_max_low / corrected_lift_slope
+	var stall_angle_high: float = zero_lift_aoa + cl_max_high / corrected_lift_slope
+	var stall_angle_low: float = zero_lift_aoa + cl_max_low / corrected_lift_slope
 	
 	var area: float = chord * span
 	var dynamic_pressure: float = 0.5 * air_density * local_flow_velocity.length_squared()
-	var angle_of_attack: float = atan2(local_flow_velocity.y, -local_flow_velocity.z)
+	var angle_of_attack: float = atan2(local_flow_velocity.y, local_flow_velocity.z)
 	
 	var coefficients: Vector3 = _calculate_coefficients(angle_of_attack, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
 	forces = coefficients * dynamic_pressure * area
@@ -104,26 +104,29 @@ func _calculate_coefficients(angle_of_attack: float, corrected_lift_slope: float
 	
 	var padding_angle_high: float = deg_to_rad(lerp(15, 5, (rad_to_deg(_flap_angle_rad) - min_flap_angle_deg) / (max_flap_angle_deg - min_flap_angle_deg)))
 	var padding_angle_low: float = deg_to_rad(lerp(15, 5, (-rad_to_deg(_flap_angle_rad) - min_flap_angle_deg) / (max_flap_angle_deg - min_flap_angle_deg)))
+	#var padding_angle_high: float = deg_to_rad(lerp(15, 5, (rad_to_deg(_flap_angle_rad) + 50) / (100)))
+	#var padding_angle_low: float = deg_to_rad(lerp(15, 5, (-rad_to_deg(_flap_angle_rad) + 50) / (100)))
 	var padded_stall_angle_high: float = stall_angle_high + padding_angle_high
 	var padded_stall_angle_low: float = stall_angle_low - padding_angle_low
 	
 	if angle_of_attack < stall_angle_high and angle_of_attack > stall_angle_low:
 		coefficients = _calculate_coefficients_at_low_aoa(angle_of_attack, corrected_lift_slope, zero_lift_aoa)
-	elif angle_of_attack > padded_stall_angle_high or angle_of_attack < padded_stall_angle_low:
-		coefficients = _calculate_coefficients_at_stall(angle_of_attack, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
-	else:
-		var coefficients_low: Vector3
-		var coefficients_stall: Vector3
-		var lerp_param: float
-		if angle_of_attack >= stall_angle_high:
-			coefficients_low = _calculate_coefficients_at_low_aoa(stall_angle_high, corrected_lift_slope, zero_lift_aoa)
-			coefficients_stall = _calculate_coefficients_at_stall(padded_stall_angle_high, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
-			lerp_param = (angle_of_attack - stall_angle_high) / (padded_stall_angle_high - stall_angle_high)
+	else: 
+		if angle_of_attack > padded_stall_angle_high or angle_of_attack < padded_stall_angle_low:
+			coefficients = _calculate_coefficients_at_stall(angle_of_attack, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
 		else:
-			coefficients_low = _calculate_coefficients_at_low_aoa(stall_angle_low, corrected_lift_slope, zero_lift_aoa)
-			coefficients_stall = _calculate_coefficients_at_stall(padded_stall_angle_low, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
-			lerp_param = (angle_of_attack - stall_angle_low) / (padded_stall_angle_low - stall_angle_low)
-		coefficients = coefficients_low.lerp(coefficients_stall, lerp_param)
+			var coefficients_low: Vector3
+			var coefficients_stall: Vector3
+			var lerp_param: float
+			if angle_of_attack > stall_angle_high:
+				coefficients_low = _calculate_coefficients_at_low_aoa(stall_angle_high, corrected_lift_slope, zero_lift_aoa)
+				coefficients_stall = _calculate_coefficients_at_stall(padded_stall_angle_high, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
+				lerp_param = (angle_of_attack - stall_angle_high) / (padded_stall_angle_high - stall_angle_high)
+			else:
+				coefficients_low = _calculate_coefficients_at_low_aoa(stall_angle_low, corrected_lift_slope, zero_lift_aoa)
+				coefficients_stall = _calculate_coefficients_at_stall(padded_stall_angle_low, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
+				lerp_param = (angle_of_attack - stall_angle_low) / (padded_stall_angle_low - stall_angle_low)
+			coefficients = coefficients_low.lerp(coefficients_stall, lerp_param)
 	return coefficients
 
 func _calculate_coefficients_at_low_aoa(angle_of_attack: float, corrected_lift_slope: float, zero_lift_aoa: float) -> Vector3:
@@ -152,11 +155,11 @@ func _calculate_coefficients_at_stall(angle_of_attack: float, corrected_lift_slo
 	if angle_of_attack > stall_angle_high:
 		lerp_param = (PI/2 - clamp(angle_of_attack, -PI/2, PI/2)) / (PI/2 - stall_angle_high)
 	else:
-		lerp_param = (PI/2 - clamp(angle_of_attack, -PI/2, PI/2)) / (-PI/2 - stall_angle_low)
+		lerp_param = (-PI/2 - clamp(angle_of_attack, -PI/2, PI/2)) / (-PI/2 - stall_angle_low)
 	induced_angle = lerp(0.0, induced_angle, lerp_param)
 	var effective_angle: float = angle_of_attack - zero_lift_aoa - induced_angle
 	
-	var normal_coefficient: float = _friction_at_90_degrees(_flap_angle_rad) * sin(effective_angle) * (1 / (0.56 + 0.44 * abs(sin(effective_angle)))) - 0.41 * (1 - exp(-17/aspect_ratio))
+	var normal_coefficient: float = _friction_at_90_degrees(_flap_angle_rad) * sin(effective_angle) * (1 / (0.56 + 0.44 * abs(sin(effective_angle))) - 0.41 * (1 - exp(-17/aspect_ratio)))
 	var tangential_coefficient: float = 0.5 * skin_friction * cos(effective_angle)
 	
 	var lift_coefficient: float = normal_coefficient * cos(effective_angle) - tangential_coefficient * sin(effective_angle)

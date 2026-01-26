@@ -15,6 +15,19 @@ func air_density(height: float) -> float:
 	const n = 5.2561
 	return air_density_sea_level * pow(T/T_0, n-1)
 
+func _ready() -> void:
+	var left_wing: AeroSurface = $Surfaces/LeftWing
+	var right_wing: AeroSurface = $Surfaces/LeftWing
+	#left_wing.set_flap_angle(20)
+	#right_wing.set_flap_angle(20)
+	#print('flaps set')
+	#for i in range(1000):
+		#var specific_angle: float = float(i)/10
+		#var air_flow: Vector3 = Vector3(0, sin(deg_to_rad(specific_angle)), -cos(deg_to_rad(specific_angle)))
+		#var forces: Vector3 = left_wing.calculate_forces(air_flow, 1.225)
+		#print(specific_angle)
+	pass
+
 func _physics_process(delta: float) -> void:
 	var forward: Vector3 = -global_transform.basis.z
 	
@@ -39,19 +52,21 @@ func _physics_process(delta: float) -> void:
 		
 		var local_flow_velocity: Vector3 = surface.global_transform.inverse().basis * (world_flow_velocity - angular_velocity.cross(surface.position))
 		local_flow_velocity.x = 0
+		#print(local_flow_velocity)
 		
 		var forces: Vector3 = surface.calculate_forces(local_flow_velocity, air_density(position.y))
 		
+		print(forces)
 		var lift: Vector3 = forces.x * lift_direction
 		#print(forces.x)
 		var drag: Vector3 = forces.y * drag_direction
 		var moment: Vector3 = forces.z * moment_direction
-		print("forces" + str(forces))
+		#print("forces" + str(forces))
 		
 		sum_of_forces += lift + drag
 		sum_of_torques += moment + surface.position.cross(lift + drag)
 		
-	print(linear_velocity)
+	#print(linear_velocity)
 	apply_central_force(sum_of_forces)
 	apply_torque(sum_of_torques)
 	
