@@ -2,9 +2,14 @@ extends RigidBody3D
 
 var currentThrustMagnitude: float = 0
 var thrust: Vector3 = Vector3.ZERO
-const MAX_THRUST_MAGNITUDE: float = 2150 # N
+const MAX_THRUST_MAGNITUDE: float = 9000                    # N
 
 var wind: Vector3 = Vector3.ZERO
+
+@onready var left_wing: AeroSurface = $Surfaces/LeftWing
+@onready var right_wing: AeroSurface = $Surfaces/RightWing
+@onready var left_tail: AeroSurface = $Surfaces/LeftTail
+@onready var right_tail: AeroSurface = $Surfaces/RightTail
 
 func air_density(height: float) -> float:
 	# https://physics.stackexchange.com/questions/299907/air-density-as-a-function-of-altitude-only
@@ -16,8 +21,7 @@ func air_density(height: float) -> float:
 	return air_density_sea_level * pow(T/T_0, n-1)
 
 func _ready() -> void:
-	var left_wing: AeroSurface = $Surfaces/LeftWing
-	var right_wing: AeroSurface = $Surfaces/LeftWing
+	#
 	#left_wing.set_flap_angle(20)
 	#right_wing.set_flap_angle(20)
 	#print('flaps set')
@@ -38,6 +42,30 @@ func _physics_process(delta: float) -> void:
 		currentThrustMagnitude = 0
 	thrust = currentThrustMagnitude * forward
 	
+	if Input.is_action_pressed("right"):
+		print("right")
+		left_wing.set_flap_angle(1)
+		right_wing.set_flap_angle(-1)
+	elif Input.is_action_pressed("left"):
+		print("left")
+		left_wing.set_flap_angle(-1)
+		right_wing.set_flap_angle(1)
+	else:
+		left_wing.set_flap_angle(0)
+		right_wing.set_flap_angle(0)
+		
+	if Input.is_action_pressed("pitch up"):
+		print("left")
+		left_tail.set_flap_angle(-4)
+		right_tail.set_flap_angle(-4)
+	elif Input.is_action_pressed("pitch down"):
+		print("right")
+		left_tail.set_flap_angle(4)
+		right_tail.set_flap_angle(4)
+	else:
+		left_tail.set_flap_angle(0)
+		right_tail.set_flap_angle(0)
+	
 	var sum_of_forces: Vector3 = thrust
 	var sum_of_torques: Vector3 = Vector3.ZERO
 	
@@ -56,7 +84,7 @@ func _physics_process(delta: float) -> void:
 		
 		var forces: Vector3 = surface.calculate_forces(local_flow_velocity, air_density(position.y))
 		
-		print(forces)
+		#print(forces)
 		var lift: Vector3 = forces.x * lift_direction
 		#print(forces.x)
 		var drag: Vector3 = forces.y * drag_direction
