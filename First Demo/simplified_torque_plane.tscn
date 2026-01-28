@@ -1,6 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://b7u1xfd8lr74h"]
+[gd_scene load_steps=5 format=3 uid="uid://b7u1xfd8lr74h"]
 
 [ext_resource type="Script" uid="uid://2on1wtkjg2u5" path="res://First Demo/simplified_torque_plane.gd" id="1_gxq3a"]
+
+[sub_resource type="Curve" id="Curve_gxq3a"]
+_limits = [-2.0, 2.0, -180.0, 180.0]
+_data = [Vector2(-180, 0), 0.0, 0.0, 0, 0, Vector2(-67.153854, -0.9762602), 0.0, 0.0, 0, 0, Vector2(-40.153854, -0.75642276), 0.0, 0.0, 0, 0, Vector2(-15, -1), 0.0, 0.0, 0, 0, Vector2(15, 1), 0.0, 0.0, 0, 0, Vector2(40.15384, 0.75707316), 0.0, 0.0, 0, 0, Vector2(67.84613, 0.91772366), 0.0, 0.0, 0, 0, Vector2(180, 0), 0.0, 0.0, 0, 0]
+point_count = 8
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_bdlyh"]
 radius = 1.5
@@ -13,6 +18,7 @@ size = Vector3(9.794312, 3.1469727, 9.377319)
 mass = 1000.0
 linear_damp_mode = 1
 script = ExtResource("1_gxq3a")
+lift_curve = SubResource("Curve_gxq3a")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.89009345, 0.45577797, 0, -0.45577797, 0.89009345, 0, 4.848154, 9.139953)

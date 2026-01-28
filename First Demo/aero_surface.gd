@@ -93,6 +93,7 @@ func calculate_forces(local_flow_velocity: Vector3, air_density: float) -> Vecto
 	var area: float = chord * span
 	var dynamic_pressure: float = 0.5 * air_density * local_flow_velocity.length_squared()
 	var angle_of_attack: float = atan2(local_flow_velocity.y, local_flow_velocity.z)
+	#print(angle_of_attack)
 	
 	var coefficients: Vector3 = _calculate_coefficients(angle_of_attack, corrected_lift_slope, zero_lift_aoa, stall_angle_high, stall_angle_low)
 	forces = coefficients * dynamic_pressure * area

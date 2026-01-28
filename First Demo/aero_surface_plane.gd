@@ -72,29 +72,22 @@ func _physics_process(delta: float) -> void:
 	var world_flow_velocity: Vector3 = -linear_velocity + wind
 	
 	for surface in $Surfaces.get_children():
-		
-		var inverse_global_transform = global_transform.inverse()
-		var lift_direction = inverse_global_transform.basis * surface.global_transform.basis.y
-		var drag_direction = inverse_global_transform.basis * surface.global_transform.basis.z
-		var moment_direction = inverse_global_transform.basis * -surface.global_transform.basis.x
+		var lift_direction = surface.basis.y
+		var drag_direction = surface.basis.z
+		var moment_direction = -surface.basis.x
 		
 		var local_flow_velocity: Vector3 = surface.global_transform.inverse().basis * (world_flow_velocity - angular_velocity.cross(surface.position))
 		local_flow_velocity.x = 0
-		#print(local_flow_velocity)
 		
 		var forces: Vector3 = surface.calculate_forces(local_flow_velocity, air_density(position.y))
 		
-		#print(forces)
 		var lift: Vector3 = forces.x * lift_direction
-		#print(forces.x)
 		var drag: Vector3 = forces.y * drag_direction
 		var moment: Vector3 = forces.z * moment_direction
-		#print("forces" + str(forces))
 		
 		sum_of_forces += lift + drag
 		sum_of_torques += moment + surface.position.cross(lift + drag)
-		
-	#print(linear_velocity)
+
 	apply_central_force(sum_of_forces)
 	apply_torque(sum_of_torques)
 	
