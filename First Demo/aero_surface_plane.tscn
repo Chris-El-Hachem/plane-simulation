@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3 uid="uid://bejarbfmqoy6x"]
+
+[ext_resource type="Script" uid="uid://b72g2uoh6fsjj" path="res://First Demo/aero_surface_plane.gd" id="1_njivj"]
+[ext_resource type="Script" uid="uid://ddq8skmkptdx0" path="res://First Demo/aero_surface.gd" id="2_wtpf8"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_3puiv"]
+radius = 1.5
+height = 10.0
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_0ct1b"]
+size = Vector3(9.794312, 3.1469727, 9.377319)
+
+[node name="AeroSurfacePlane" type="RigidBody3D"]
+mass = 1000.0
+linear_damp_mode = 1
+script = ExtResource("1_njivj")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.89009345, 0.45577797, 0, -0.45577797, 0.89009345, 0, 4.848154, 9.139953)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_3puiv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_0ct1b")
+
+[node name="Surfaces" type="Node3D" parent="."]
+
+[node name="LeftWing" type="Node3D" parent="Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, 0.2)
+script = ExtResource("2_wtpf8")
+zero_lift_aoa_deg = -4.0
+chord = 2.0
+flap_fraction = 0.2
+span = 4.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="LeftTail" type="Node3D" parent="Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 1, 3.3)
+script = ExtResource("2_wtpf8")
+zero_lift_aoa_deg = 2.0
+flap_fraction = 0.1
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="RightWing" type="Node3D" parent="Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.2)
+script = ExtResource("2_wtpf8")
+zero_lift_aoa_deg = -4.0
+chord = 2.0
+flap_fraction = 0.2
+span = 4.0
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
+
+[node name="RightTail" type="Node3D" parent="Surfaces"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 3.3)
+script = ExtResource("2_wtpf8")
+zero_lift_aoa_deg = 2.0
+flap_fraction = 0.1
+metadata/_custom_type_script = "uid://ddq8skmkptdx0"
