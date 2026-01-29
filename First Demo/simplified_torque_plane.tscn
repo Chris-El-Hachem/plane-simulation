@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://b7u1xfd8lr74h"]
+[gd_scene load_steps=6 format=3 uid="uid://b7u1xfd8lr74h"]
 
 [ext_resource type="Script" uid="uid://2on1wtkjg2u5" path="res://First Demo/simplified_torque_plane.gd" id="1_gxq3a"]
 
@@ -10,6 +10,9 @@ point_count = 8
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_bdlyh"]
 radius = 1.5
 height = 10.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_gxq3a"]
+size = Vector3(9, 2, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5c78l"]
 size = Vector3(9.794312, 3.1469727, 9.377319)
@@ -26,6 +29,10 @@ transform = Transform3D(1, 0, 0, 0, 0.89009345, 0.45577797, 0, -0.45577797, 0.89
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
 mesh = SubResource("CapsuleMesh_bdlyh")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+mesh = SubResource("BoxMesh_gxq3a")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_5c78l")
